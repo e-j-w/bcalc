@@ -1,4 +1,4 @@
-CFLAGS   = -O -o2 -g -Wall -fPIC -lm
+CFLAGS   = -o2 -Wall -lm
 
 all: bcalc
 
