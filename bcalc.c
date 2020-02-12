@@ -2,14 +2,17 @@
 
 void printHelp(){
   printf("B(E2) Calculator -- calculates reduced transition probabilities.\n");
-  printf("usage: bcalc -E VALUE -M VALUE -Lt VALUE -Hl VALUE -B VALUE\n");
+  printf("example usage: bcalc -e VALUE -m VALUE -lt VALUE\n");
   printf("  Both of the following are needed:\n");
   printf("    -e         --  transition energy in keV\n");
   printf("    -m         --  multipole (eg. E1, M1, E2, etc.)\n");
   printf("  One of the following is needed:\n");
   printf("    -lt        --  Mean transition lifetime (in ps)\n");
   printf("    -hl        --  Transition half-life (in ps)\n");
-  printf("    -b         --  Reduced transition probability\n");
+  printf("    -b         --  Reduced transition probability (for the\n"); 
+  printf("                   L multipole) in units of e^2 fm^(2L) for\n");
+  printf("                   electric multipoles or uN^2 fm^(2L-2) for\n");
+  printf("                   magnetic multipoles.\n");
   printf("  Optional parameters:\n");
   printf("    -d         --  mixing ratio with the L+1 multipole\n");
   printf("    -ji        --  inital spin (integer or half-integer)\n");
@@ -75,6 +78,10 @@ void calcB(int bup, int EM, int L, double Et, double lt, double ji, double jf, i
 void calcLt(int bup, int EM, int L, double Et, double b, double ji, double jf, int verbose, char * mstr){
   if(verbose){
     printf("\nLIFETIME CALCULATION\n--------------------\n");
+  }
+
+  if(bup){
+    b = b*(2.0*jf + 1.0)/(2.0*ji + 1.0);
   }
 
   double fac = 8.0*PI*(L+1)/(L*HBAR_MEVS*pow(dblfac((2.0*L)+1.0),2.0)*LN2);

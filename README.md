@@ -12,10 +12,10 @@ This shouldn't depend on any external libraries.  Tested on CentOS 7.
 
 ## Usage
 
-The calculator is run from the command line:
+The calculator is run from the command line, for example:
 
 ```
-bcalc -e VALUE -m VALUE -lt VALUE -hl VALUE -b VALUE
+bcalc -e VALUE -m VALUE -lt VALUE
 ```
 
 Running `bcalc` without any parameters will print a list of parameters.
@@ -35,7 +35,7 @@ One of the following is needed:
 |:---:|:---:|
 | -lt | Mean transition lifetime (in ps) |
 | -hl | Transition half-life (in ps) |
-| -b | Reduced transition probability |
+| -b | Reduced transition probability (for the L multipole) in units of e^2 fm^(2L) for electric multipoles or uN^2 fm^(2L-2) for magnetic multipoles. |
 
 Optional parameters:
 
