@@ -18,6 +18,9 @@ void printHelp(){
   printf("    -ji        --  inital spin (integer or half-integer)\n");
   printf("    -jf        --  final spin (integer or half-integer)\n");
   printf("  Flags:\n");
+  printf("    --barn     --  Use/calculate transition probability with spatial\n");
+  printf("                   dimension in barns rather than fm (eg. e^2 b^2\n");
+  printf("                   rather than e^2 fm^4).\n");
   printf("    --up       --  Use/calculate transition probability from\n");
   printf("                   final to initial state instead of vice versa.\n");
   printf("                   If used, requires the -ji and -jf parameters.\n");
@@ -37,7 +40,7 @@ double dblfac(unsigned int n){
 }
 
 /* calcualtes the value of the reduced transtion probability */
-void calcB(int bup, int EM, int L, double Et, double lt, double ji, double jf, int verbose, char * mstr){
+void calcB(int bup, int EM, int L, double Et, double lt, double ji, double jf, int verbose, int barn, char * mstr){
   if(verbose){
     printf("\nB(%s) CALCULATION\n-----------------\n",mstr);
   }
@@ -53,8 +56,10 @@ void calcB(int bup, int EM, int L, double Et, double lt, double ji, double jf, i
       b = b*(2.0*ji + 1.0)/(2.0*jf + 1.0);
     }
     if(L>0){
-      printf("%0.4E e^2 fm^%i\n",b,2*L);
-      printf("%0.4E e^2 b^%i\n",b/pow(BARN_FM,L),L);
+      if(!barn)
+        printf("%0.4E e^2 fm^%i\n",b,2*L);
+      else
+        printf("%0.4E e^2 b^%i\n",b/pow(BARN_FM,L),L);
     }else{
       printf("%0.4E e^2\n",b);
     }
@@ -68,20 +73,34 @@ void calcB(int bup, int EM, int L, double Et, double lt, double ji, double jf, i
     if(bup){
       b = b*(2.0*ji + 1.0)/(2.0*jf + 1.0);
     }
-    if(L>1)
-      printf("%0.4E uN^2 fm^%i\n",b,(2*L) - 2);
-    else
+    if(L>1){
+      if(!barn)
+        printf("%0.4E uN^2 fm^%i\n",b,(2*L) - 2);
+      else
+        printf("%0.4E uN^2 b^%i\n",b/pow(BARN_FM,L-1),L-1);
+    }else{
       printf("%0.4E uN^2\n",b);
+    }
+      
   }
 }
 
-void calcLt(int bup, int EM, int L, double Et, double b, double ji, double jf, int verbose, char * mstr){
+void calcLt(int bup, int EM, int L, double Et, double b, double ji, double jf, int verbose, int barn, char * mstr){
   if(verbose){
     printf("\nLIFETIME CALCULATION\n--------------------\n");
   }
 
   if(bup){
     b = b*(2.0*jf + 1.0)/(2.0*ji + 1.0);
+  }
+
+  //convert barn units to fm units
+  if(barn){
+    if(EM==0){
+      b = b*pow(BARN_FM,L);
+    }else if(EM==1){
+      b = b*pow(BARN_FM,L-1);
+    }
   }
 
   double fac = 8.0*PI*(L+1)/(L*HBAR_MEVS*pow(dblfac((2.0*L)+1.0),2.0)*LN2);
@@ -114,6 +133,7 @@ int main(int argc, char *argv[]) {
   double b = 0.; /* reduced transition probability */
   int calcMode = -1; /* 0=calulate B, 1=calculate lifetime */
   int verbose = 0; /* 0=none, 1=verbose */
+  int barn = 0; /* 0=fm units, 1=barn units */
   int bup = 0; /* 0=down, 1=up */
   double ji = -1.; /* Initial spin */
   double jf = -1.; /* Final spin*/
@@ -126,6 +146,8 @@ int main(int argc, char *argv[]) {
       verbose = 1;
     }else if(strcmp(argv[i],"--up")==0){
       bup = 1;
+    }else if(strcmp(argv[i],"--barn")==0){
+      barn = 1;
     }else if(strcmp(argv[i],"--help")==0){
       printHelp();
       exit(-1);
@@ -244,9 +266,21 @@ int main(int argc, char *argv[]) {
     else if(calcMode == 1){
       printf("B(%s): %f ",mstr, b);
       if(EM==0){
-        printf("e^2 fm^%i\n",2*L);
+        if(!barn){
+          printf("e^2 fm^%i\n",2*L);
+        }else{
+          printf("e^2 b^%i\n",L);
+        }
       }else if(EM==1){
-        printf("uN^2 fm^%i\n",(2*L) - 2);
+        if(L>1){
+          if(!barn){
+            printf("uN^2 fm^%i\n",(2*L) - 2);
+          }else{
+            printf("uN^2 b^%i\n",L-1);
+          }
+        }else if(L==1){
+          printf("uN^2\n");
+        }
       }
     }
   }
@@ -266,11 +300,11 @@ int main(int argc, char *argv[]) {
   Et=Et/1000.0; //convert energy to MeV
 
   if(calcMode == 0){
-    calcB(bup,EM,L,Et,lt,ji,jf,verbose,mstr);
+    calcB(bup,EM,L,Et,lt,ji,jf,verbose,barn,mstr);
     if(useDelta)
-      calcB(bup,!EM,L+1,Et,lt1,ji,jf,verbose,mstr1);
+      calcB(bup,!EM,L+1,Et,lt1,ji,jf,verbose,barn,mstr1);
   }else if(calcMode == 1){
-    calcLt(bup,EM,L,Et,b,ji,jf,verbose,mstr);
+    calcLt(bup,EM,L,Et,b,ji,jf,verbose,barn,mstr);
   }
   
 

@@ -49,6 +49,7 @@ Flags:
 
 |**Flag**|**Description**|
 |:---:|:---:|
+| --barn | Use/calculate transition probability with spatial dimension in barns rather than fm (eg. B(E2) in e<sup>2</sup> b<sup>2</sup> rather than e<sup>2</sup> fm<sup>4</sup>). |
 | --up | Use/calculate transition probability from final to initial state instead of vice versa.  If used, requires the `-ji` and `-jf` parameters. |
 | --verbose | Print detailed information. |
 | --help | Print a list of parameters. |
