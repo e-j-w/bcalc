@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
   int i; /*counters*/
 
   /*initialize parameter values*/
-  char mstr[2], mstr1[2];
+  char mstr[3], mstr1[3];
   double Et = -1.; /* transition energy */
   int L = -1; /* multipolarity */
   int EM = -1; /* 0=electric, 1=magnetic */
@@ -290,9 +290,9 @@ int main(int argc, char *argv[]) {
     lt1 = lt * (1.0 + delta*delta) / (delta*delta);
     lt = lt * (1.0 + delta*delta);
     if(mstr[0] == 'E')
-      sprintf(mstr1,"M%i",L+1);
+      snprintf(mstr1,3,"M%i",L+1);
     else
-      sprintf(mstr1,"E%i",L+1);
+      snprintf(mstr1,3,"E%i",L+1);
     
   }
 

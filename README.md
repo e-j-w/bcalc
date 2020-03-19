@@ -8,7 +8,7 @@ Maintainer: Jonathan Williams
 
 Use `make` to compile. To run the program from anywhere, move the resulting `bcalc` executable to any directory under your `$PATH` environment variable.
 
-This shouldn't depend on any external libraries.  Tested on CentOS 7.
+This shouldn't depend on any external libraries.  Tested on CentOS 7 and Arch Linux (as of March 2020).
 
 ## Usage
 
