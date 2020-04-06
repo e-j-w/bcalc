@@ -14,16 +14,26 @@ void printHelp(){
   printf("                   electric multipoles or uN^2 fm^(2L-2) for\n");
   printf("                   magnetic multipoles.\n");
   printf("  Optional parameters:\n");
+  printf("    -br        --  branching fraction of this transition (maximum 1,\n"); 
+  printf("                   default 1)\n");
   printf("    -d         --  mixing ratio with the L+1 multipole\n");
   printf("    -ji        --  inital spin (integer or half-integer)\n");
   printf("    -jf        --  final spin (integer or half-integer)\n");
+  printf("    -A         --  mass number of the nucleus\n");
   printf("  Flags:\n");
   printf("    --barn     --  Use/calculate transition probability with spatial\n");
   printf("                   dimension in barns rather than fm (eg. e^2 b^2\n");
   printf("                   rather than e^2 fm^4).\n");
+  printf("    --wu       --  Use/calculate transition probability in\n");
+  printf("                   Weisskopf units (W.u.) rather than the default\n"); 
+  printf("                   units specified above.  If used, requires the -A\n");
+  printf("                   parameter.\n");
   printf("    --up       --  Use/calculate transition probability from\n");
   printf("                   final to initial state instead of vice versa.\n");
   printf("                   If used, requires the -ji and -jf parameters.\n");
+  printf("    --brrel    --  Specifies that the branching fraction provided\n");
+  printf("                   with the -br option is actually an intensity\n");
+  printf("                   relative to another transition.\n");
   printf("    --verbose  --  Print detailed information.\n");
 }
 
@@ -39,10 +49,74 @@ double dblfac(unsigned int n){
   return val;
 }
 
-/* calcualtes the value of the reduced transtion probability */
-void calcB(int bup, int EM, int L, double Et, double lt, double ji, double jf, int verbose, int barn, char * mstr){
+/* calculates single particle lifetimes */
+double ltsp(int EM, int L, int nucA, const double Et_keV){
+
+  if(L>5){
+    printf("ERROR: Cannot calculate single particle lifetimes for transitions with L>5.\n");
+    exit(-1);
+  }
+
+  double hl_sp = 0.;
+  if(EM == 0){
+    /* electric */
+    switch(L){
+      case 5:
+        hl_sp = (2.89E44)/(pow(Et_keV,11.0)*pow(nucA,10./3.));
+        break;
+      case 4:
+        hl_sp = (6.50E31)/(pow(Et_keV,9.0)*pow(nucA,8./3.));
+        break;
+      case 3:
+        hl_sp = (2.04E19)/(pow(Et_keV,7.0)*pow(nucA,2.));
+        break;
+      case 2:
+        hl_sp= (9.52E6)/(pow(Et_keV,5.0)*pow(nucA,4./3.));
+        break;
+      case 1:
+        hl_sp = (6.76E-6)/(pow(Et_keV,3.0)*pow(nucA,2./3.));
+        break;
+      default:
+        break;
+    }
+  }else{
+    /* magnetic */
+    switch(L){
+      case 5:
+        hl_sp = (9.42E44)/(pow(Et_keV,11.0)*pow(nucA,8./3.));
+        break;
+      case 4:
+        hl_sp = (2.12E32)/(pow(Et_keV,9.0)*pow(nucA,2.));
+        break;
+      case 3:
+        hl_sp = (6.66E19)/(pow(Et_keV,7.0)*pow(nucA,4./3.));
+        break;
+      case 2:
+        hl_sp = (3.10E7)/(pow(Et_keV,5.0)*pow(nucA,2./3.));
+        break;
+      case 1:
+        hl_sp = (2.20E-5)/pow(Et_keV,3.0);
+        break;
+      default:
+        break;
+    }
+  }
+
+  //convert from half-life to lifetime (in s)
+  return hl_sp/LN2;
+}
+
+/* calculates the value of the reduced transtion probability */
+void calcB(int bup, int EM, int L, double Et, double lt, double ji, double jf, int verbose, int barn, char * mstr, int nucA){
   if(verbose){
     printf("\nB(%s) CALCULATION\n-----------------\n",mstr);
+  }
+
+  if(barn == 2){
+    /* Weisskopf unit calculation */
+    double lt_sp = ltsp(EM,L,nucA,Et*1000.);
+    printf("%0.4E W.u.\n",lt_sp/lt);
+    return;
   }
 
   double fac = 8.0*PI*(L+1)/(L*HBAR_MEVS*pow(dblfac((2.0*L)+1.0),2.0)*LN2);
@@ -56,10 +130,15 @@ void calcB(int bup, int EM, int L, double Et, double lt, double ji, double jf, i
       b = b*(2.0*ji + 1.0)/(2.0*jf + 1.0);
     }
     if(L>0){
-      if(!barn)
-        printf("%0.4E e^2 fm^%i\n",b,2*L);
-      else
-        printf("%0.4E e^2 b^%i\n",b/pow(BARN_FM,L),L);
+      switch(barn){
+        case 1:
+          printf("%0.4E e^2 b^%i\n",b/pow(BARN_FM,L),L);
+          break;
+        case 0:
+        default:
+          printf("%0.4E e^2 fm^%i\n",b,2*L);
+          break;
+      }  
     }else{
       printf("%0.4E e^2\n",b);
     }
@@ -74,10 +153,15 @@ void calcB(int bup, int EM, int L, double Et, double lt, double ji, double jf, i
       b = b*(2.0*ji + 1.0)/(2.0*jf + 1.0);
     }
     if(L>1){
-      if(!barn)
-        printf("%0.4E uN^2 fm^%i\n",b,(2*L) - 2);
-      else
-        printf("%0.4E uN^2 b^%i\n",b/pow(BARN_FM,L-1),L-1);
+      switch(barn){
+        case 1:
+          printf("%0.4E uN^2 b^%i\n",b/pow(BARN_FM,L-1),L-1);
+          break;
+        case 0:
+        default:
+          printf("%0.4E uN^2 fm^%i\n",b,(2*L) - 2);
+          break;
+      }
     }else{
       printf("%0.4E uN^2\n",b);
     }
@@ -85,13 +169,20 @@ void calcB(int bup, int EM, int L, double Et, double lt, double ji, double jf, i
   }
 }
 
-void calcLt(int bup, int EM, int L, double Et, double b, double ji, double jf, int verbose, int barn, char * mstr){
+void calcLt(int bup, int EM, int L, double Et, double b, double ji, double jf, int verbose, int barn, char * mstr, int nucA, double branching){
   if(verbose){
     printf("\nLIFETIME CALCULATION\n--------------------\n");
   }
 
   if(bup){
     b = b*(2.0*jf + 1.0)/(2.0*ji + 1.0);
+  }
+
+  if(barn == 2){
+    /* Weisskopf unit calculation */
+    double lt_sp = ltsp(EM,L,nucA,Et*1000.);
+    printf("%0.4E ps\n",lt_sp/b);
+    return;
   }
 
   //convert barn units to fm units
@@ -111,7 +202,12 @@ void calcLt(int bup, int EM, int L, double Et, double b, double ji, double jf, i
   }
   double lt = 1/(fac*b);
   lt = lt / 1.0E-12; //convert lifetime to ps
-  printf("%0.4E ps\n",lt);
+  lt = 1.0/((1.0/lt)*branching); //partial lifetime
+  printf("%0.4E ps",lt);
+  if(branching != 1.){
+    printf(" (partial lifetime)");
+  }
+  printf("\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -133,12 +229,15 @@ int main(int argc, char *argv[]) {
   double b = 0.; /* reduced transition probability */
   int calcMode = -1; /* 0=calulate B, 1=calculate lifetime */
   int verbose = 0; /* 0=none, 1=verbose */
-  int barn = 0; /* 0=fm units, 1=barn units */
+  int barn = 0; /* 0=fm units, 1=barn units, 2=Weisskopf units */
   int bup = 0; /* 0=down, 1=up */
   double ji = -1.; /* Initial spin */
   double jf = -1.; /* Final spin*/
   double delta = 0; /* mixing ratio */
+  double branching = 1.; /* branching fraction */
   int useDelta = 0; /* 0=no mixing, 1=mixing */
+  int brrel = 0; /* 0=use branching fraction, 1=use relative intensity */
+  int nucA = -1; /* mass number of the nucleus of interest */
 
   /*read parameters*/
   for(i=0;i<argc;i++){
@@ -147,7 +246,11 @@ int main(int argc, char *argv[]) {
     }else if(strcmp(argv[i],"--up")==0){
       bup = 1;
     }else if(strcmp(argv[i],"--barn")==0){
-      barn = 1;
+      barn += 1;
+    }else if(strcmp(argv[i],"--wu")==0){
+      barn += 2;
+    }else if(strcmp(argv[i],"--brrel")==0){
+      brrel = 1;
     }else if(strcmp(argv[i],"--help")==0){
       printHelp();
       exit(-1);
@@ -189,6 +292,10 @@ int main(int argc, char *argv[]) {
     }else if(strcmp(argv[i],"-d")==0){
       delta=atof(argv[i+1]);
       useDelta = 1;
+    }else if(strcmp(argv[i],"-br")==0){
+      branching=atof(argv[i+1]);
+    }else if(strcmp(argv[i],"-A")==0){
+      nucA=atoi(argv[i+1]);
     }else if(strcmp(argv[i],"-ji")==0){
       ji=atof(argv[i+1]);
       if(ji<0){
@@ -235,6 +342,24 @@ int main(int argc, char *argv[]) {
     ji=2.;
     jf=0.;
   }
+  if((branching <= 0.)||(branching > 1.)){
+    printf("ERROR: invalid branching fraction (must be a positive number less than 1).\n");
+    exit(-1);
+  }
+  if(barn>2){
+    printf("ERROR: only one of --barn and --wu can be used at once.\n");
+    exit(-1);
+  }
+  if(barn==2){
+    if(nucA == -1){
+      printf("ERROR: when using --wu, must also specify the -A parameter.\n");
+      exit(-1);
+    }else if(nucA <= 0){
+      printf("ERROR: The mass number A cannot be less than 1.\n");
+      exit(-1);
+    }
+  }
+  
 
   /*print extra info*/
   if(verbose){
@@ -266,23 +391,46 @@ int main(int argc, char *argv[]) {
     else if(calcMode == 1){
       printf("B(%s): %f ",mstr, b);
       if(EM==0){
-        if(!barn){
+        if(barn == 0){
           printf("e^2 fm^%i\n",2*L);
-        }else{
+        }else if(barn == 1){
           printf("e^2 b^%i\n",L);
+        }else{
+          printf("W.u.\n");
         }
       }else if(EM==1){
         if(L>1){
-          if(!barn){
+          if(barn == 0){
             printf("uN^2 fm^%i\n",(2*L) - 2);
-          }else{
+          }else if(barn == 1){
             printf("uN^2 b^%i\n",L-1);
+          }else{
+            printf("W.u.\n");
           }
         }else if(L==1){
-          printf("uN^2\n");
+          if(barn < 2){
+            printf("uN^2\n");
+          }else{
+            printf("W.u.\n");
+          }
         }
       }
     }
+    if(nucA>0)
+      printf("A = %i\n",nucA);
+    if(brrel == 0)
+      printf("Branching fraction: %.2f\n",branching);
+    else if(brrel == 1)
+      printf("Relative intensity: %.2f\n",branching);
+  }
+
+  /* branching fraction calculation */
+  if(brrel == 1)
+    branching = branching/(branching + 1.0);
+  if(calcMode == 0)
+    lt = 1.0/((1.0/lt)*branching); //partial lifetime
+  if((verbose)&&(calcMode==0)&&(branching != 1.)){
+    printf("Partial lifetime: %0.3f ps\n",lt);
   }
 
   /* mixing ratio calculation */
@@ -299,12 +447,13 @@ int main(int argc, char *argv[]) {
   lt=lt*1.0E-12; //convert lifetime to s
   Et=Et/1000.0; //convert energy to MeV
 
+
   if(calcMode == 0){
-    calcB(bup,EM,L,Et,lt,ji,jf,verbose,barn,mstr);
+    calcB(bup,EM,L,Et,lt,ji,jf,verbose,barn,mstr,nucA);
     if(useDelta)
-      calcB(bup,!EM,L+1,Et,lt1,ji,jf,verbose,barn,mstr1);
+      calcB(bup,!EM,L+1,Et,lt1,ji,jf,verbose,barn,mstr1,nucA);
   }else if(calcMode == 1){
-    calcLt(bup,EM,L,Et,b,ji,jf,verbose,barn,mstr);
+    calcLt(bup,EM,L,Et,b,ji,jf,verbose,barn,mstr,nucA,branching);
   }
   
 
