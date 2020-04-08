@@ -107,7 +107,7 @@ double ltsp(int EM, int L, int nucA, const double Et_keV){
 }
 
 /* calculates the value of the reduced transtion probability */
-void calcB(int bup, int EM, int L, double Et, double lt, double ji, double jf, int verbose, int barn, char * mstr, int nucA){
+void calcB(const int bup, const int EM, const int L, const double Et, const double lt, const double ji, const double jf, const int verbose, const int barn, const char * mstr, const int nucA){
   if(verbose){
     printf("\nB(%s) CALCULATION\n-----------------\n",mstr);
   }
@@ -169,7 +169,7 @@ void calcB(int bup, int EM, int L, double Et, double lt, double ji, double jf, i
   }
 }
 
-void calcLt(int bup, int EM, int L, double Et, double b, double ji, double jf, int verbose, int barn, char * mstr, int nucA, double branching){
+void calcLt(const int bup, const int EM, const int L, const double Et, double b, const double ji, const double jf, const int verbose, const int barn, const char * mstr, const int nucA, const double branching){
   if(verbose){
     printf("\nLIFETIME CALCULATION\n--------------------\n");
   }
@@ -441,10 +441,16 @@ int main(int argc, char *argv[]) {
       snprintf(mstr1,3,"M%i",L+1);
     else
       snprintf(mstr1,3,"E%i",L+1);
+
+    if(verbose){
+      printf("Partial lifetime (%s): %0.3f ps\n",mstr,lt);
+      printf("Partial lifetime (%s): %0.3f ps\n",mstr1,lt1);
+    }
     
   }
 
   lt=lt*1.0E-12; //convert lifetime to s
+  lt1=lt1*1.0E-12; //convert lifetime to s
   Et=Et/1000.0; //convert energy to MeV
 
 
