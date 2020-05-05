@@ -55,5 +55,5 @@ Flags:
 | --wu  |  Use/calculate transition probability in Weisskopf units (W.u.) rather than the default units specified above.  If used, requires the `-A` parameter. |
 | --up | Use/calculate transition probability from final to initial state instead of vice versa.  If used, requires the `-ji` and `-jf` parameters. |
 | --brrel | Specifies that the branching fraction provided with the `-br` option is actually an intensity relative to another transition. |
-| --verbose | Print detailed information. |
+| --quiet | Only show the result of the calculation. |
 | --help | Print a list of parameters. |

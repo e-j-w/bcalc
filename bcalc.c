@@ -1,11 +1,12 @@
 #include "bcalc.h"
 
 void printHelp(){
-  printf("B(E2) Calculator -- calculates reduced transition probabilities.\n");
-  printf("example usage: bcalc -e VALUE -m VALUE -lt VALUE\n");
+  printf("\nReduced transition probability calculator\n");
+  printf("example usage: bcalc -e VALUE -m VALUE -lt VALUE\n\n");
   printf("  Both of the following are needed:\n");
   printf("    -e         --  transition energy in keV\n");
   printf("    -m         --  multipole (eg. E1, M1, E2, etc.)\n");
+  printf("\n");
   printf("  One of the following is needed:\n");
   printf("    -lt        --  Mean transition lifetime (in ps)\n");
   printf("    -hl        --  Transition half-life (in ps)\n");
@@ -13,6 +14,10 @@ void printHelp(){
   printf("                   L multipole) in units of e^2 fm^(2L) for\n");
   printf("                   electric multipoles or uN^2 fm^(2L-2) for\n");
   printf("                   magnetic multipoles.\n");
+  printf("\n");
+  printf(" --- Press any key for more ---");
+  getc(stdin);
+  printf("\n");
   printf("  Optional parameters:\n");
   printf("    -br        --  branching fraction of this transition (maximum 1,\n"); 
   printf("                   default 1)\n");
@@ -20,6 +25,7 @@ void printHelp(){
   printf("    -ji        --  inital spin (integer or half-integer)\n");
   printf("    -jf        --  final spin (integer or half-integer)\n");
   printf("    -A         --  mass number of the nucleus\n");
+  printf("\n");
   printf("  Flags:\n");
   printf("    --barn     --  Use/calculate transition probability with spatial\n");
   printf("                   dimension in barns rather than fm (eg. e^2 b^2\n");
@@ -34,7 +40,7 @@ void printHelp(){
   printf("    --brrel    --  Specifies that the branching fraction provided\n");
   printf("                   with the -br option is actually an intensity\n");
   printf("                   relative to another transition.\n");
-  printf("    --verbose  --  Print detailed information.\n");
+  printf("    --quiet    --  Only show the result of the calculation.\n");
 }
 
 double dblfac(unsigned int n){ 
@@ -228,7 +234,7 @@ int main(int argc, char *argv[]) {
   double lt1 = 0.; /* lifetime for L+1 multipole (mixed transitions) */
   double b = 0.; /* reduced transition probability */
   int calcMode = -1; /* 0=calulate B, 1=calculate lifetime */
-  int verbose = 0; /* 0=none, 1=verbose */
+  int verbose = 1; /* 0=none, 1=verbose */
   int barn = 0; /* 0=fm units, 1=barn units, 2=Weisskopf units */
   int bup = 0; /* 0=down, 1=up */
   double ji = -1.; /* Initial spin */
@@ -241,8 +247,8 @@ int main(int argc, char *argv[]) {
 
   /*read parameters*/
   for(i=0;i<argc;i++){
-    if(strcmp(argv[i],"--verbose")==0){
-      verbose = 1;
+    if(strcmp(argv[i],"--quiet")==0){
+      verbose = 0;
     }else if(strcmp(argv[i],"--up")==0){
       bup = 1;
     }else if(strcmp(argv[i],"--barn")==0){
