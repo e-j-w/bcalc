@@ -108,6 +108,9 @@ double ltsp(int EM, int L, int nucA, const double Et_keV){
     }
   }
 
+  //convert from s to ps
+  hl_sp = hl_sp / 1.0E-12;
+
   //convert from half-life to lifetime (in s)
   return hl_sp/LN2;
 }
