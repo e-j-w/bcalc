@@ -108,9 +108,6 @@ double ltsp(int EM, int L, int nucA, const double Et_keV){
     }
   }
 
-  //convert from s to ps
-  hl_sp = hl_sp / 1.0E-12;
-
   //convert from half-life to lifetime (in s)
   return hl_sp/LN2;
 }
@@ -190,6 +187,7 @@ void calcLt(const int bup, const int EM, const int L, const double Et, double b,
   if(barn == 2){
     /* Weisskopf unit calculation */
     double lt_sp = ltsp(EM,L,nucA,Et*1000.);
+    lt_sp = lt_sp / 1.0E-12; //convert from s to ps
     printf("%0.4E ps\n",lt_sp/b);
     return;
   }
