@@ -8,7 +8,7 @@ Maintainer: Jonathan Williams
 
 Use `make` to compile. To run the program from anywhere, move the resulting `bcalc` executable to any directory under your `$PATH` environment variable.
 
-This shouldn't depend on any external libraries.  Tested on CentOS 7 and Arch Linux (as of April 2020).
+This shouldn't depend on any external libraries.  Tested on CentOS 7 and Arch Linux (as of December 2020).
 
 ## Usage
 
@@ -46,6 +46,7 @@ Optional parameters:
 | -ji | inital spin (integer or half-integer) |
 | -jf | final spin (integer or half-integer) |
 | -A | mass number of the nucleus |
+| -Z | proton number of the nucleus |
 
 Flags:
 
@@ -55,5 +56,6 @@ Flags:
 | --wu  |  Use/calculate transition probability in Weisskopf units (W.u.) rather than the default units specified above.  If used, requires the `-A` parameter. |
 | --up | Use/calculate transition probability from final to initial state instead of vice versa.  If used, requires the `-ji` and `-jf` parameters. |
 | --brrel | Specifies that the branching fraction provided with the `-br` option is actually an intensity relative to another transition. |
+| --beta2 | Calculate the quadrupole deformation parameter, assuming a 2->0 (g.s.) transition.  Requires `-m E2 -ji 2 -jf 0`, and the `-A` and `-Z` parameters.  Assumes mean charge radius R = r_0*A^(1/3), with r_0 = 1.2 fm. |
 | --quiet | Only show the result of the calculation. |
 | --help | Print a list of parameters. |

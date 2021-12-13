@@ -25,6 +25,10 @@ void printHelp(){
   printf("    -ji        --  inital spin (integer or half-integer)\n");
   printf("    -jf        --  final spin (integer or half-integer)\n");
   printf("    -A         --  mass number of the nucleus\n");
+  printf("    -Z         --  proton number of the nucleus\n");
+  printf("\n");
+  printf(" --- Press any key for more ---");
+  getc(stdin);
   printf("\n");
   printf("  Flags:\n");
   printf("    --barn     --  Use/calculate transition probability with spatial\n");
@@ -40,6 +44,11 @@ void printHelp(){
   printf("    --brrel    --  Specifies that the branching fraction provided\n");
   printf("                   with the -br option is actually an intensity\n");
   printf("                   relative to another transition.\n");
+  printf("    --beta2    --  Calculate the quadrupole deformation parameter,\n");
+  printf("                   assuming a 2->0 (g.s.) transition.  Requires\n");
+  printf("                   '-m E2 -ji 2 -jf 0', and the -A and -Z parameters.\n");
+  printf("                   Assumes mean charge radius R = r_0*A^(1/3), with.\n");
+  printf("                   r_0 = 1.2 fm.\n");
   printf("    --quiet    --  Only show the result of the calculation.\n");
 }
 
@@ -110,6 +119,44 @@ double ltsp(int EM, int L, int nucA, const double Et_keV){
 
   //convert from half-life to lifetime (in s)
   return hl_sp/LN2;
+}
+
+/* calculates the value of the quadrupole deformation parameter, assuming an input reduced transtion probability and a 2->0 transition */
+void calcBeta2(const double Et, const double b_in, const int nucA, const int nucZ, const int barn, const int verbose){
+  
+  double b=0.;
+
+  if(barn == 2){
+    /* input using Weisskopf units, first calculate lifetime */
+    double lt = ltsp(0,2,nucA,Et*1000.)/b_in;
+    /* calculate b from lifetime */
+    double fac = 8.0*PI*(2+1)/(2*HBAR_MEVS*pow(dblfac((2.0*2)+1.0),2.0)*LN2);
+    fac = fac * (pow((Et/HBARC_MEVFM),2.0*2 + 1.0));
+    b=1/(fac*lt); /* lifetime to reduced transition probability (E2: e^2 fm^4) */
+  }else{
+    b=b_in;
+  }
+
+  double beta = sqrt(5*b)*4.0*PI/(2*nucZ*ESQ_MEVFM*1.20*1.20*pow(1.0*nucA,2.0/3.0));
+
+  if(verbose){
+    printf("\nbeta_2 CALCULATION\n-----------------\n");
+    printf("%0.4E\n",beta);
+  }else{
+    printf("beta_2 = %0.4E\n",beta);
+  }
+  
+}
+
+/* calculates the value of the quadrupole deformation parameter, assuming an input lifetime and a 2->0 transition */
+void calcBeta2Lt(const double Et, const double lt, const int nucA, const int nucZ, const int verbose){
+
+  double fac = 8.0*PI*(2+1)/(2*HBAR_MEVS*pow(dblfac((2.0*2)+1.0),2.0)*LN2);
+  fac = fac * (pow((Et/HBARC_MEVFM),2.0*2 + 1.0));
+  
+  double b=1/(fac*lt); /* lifetime to reduced transition probability (E2: e^2 fm^4) */
+  calcBeta2(Et,b,nucA,nucZ,0,verbose);
+  
 }
 
 /* calculates the value of the reduced transtion probability */
@@ -243,8 +290,10 @@ int main(int argc, char *argv[]) {
   double delta = 0; /* mixing ratio */
   double branching = 1.; /* branching fraction */
   int useDelta = 0; /* 0=no mixing, 1=mixing */
+  int calcB2 = 0; /* 0=no beta_2 calc, 1=calc beta_2 */
   int brrel = 0; /* 0=use branching fraction, 1=use relative intensity */
   int nucA = -1; /* mass number of the nucleus of interest */
+  int nucZ = -1; /* proton number of the nucleus of interest */
 
   /*read parameters*/
   for(i=0;i<argc;i++){
@@ -252,6 +301,8 @@ int main(int argc, char *argv[]) {
       verbose = 0;
     }else if(strcmp(argv[i],"--up")==0){
       bup = 1;
+    }else if(strcmp(argv[i],"--beta2")==0){
+      calcB2 = 1;
     }else if(strcmp(argv[i],"--barn")==0){
       barn += 1;
     }else if(strcmp(argv[i],"--wu")==0){
@@ -303,6 +354,8 @@ int main(int argc, char *argv[]) {
       branching=atof(argv[i+1]);
     }else if(strcmp(argv[i],"-A")==0){
       nucA=atoi(argv[i+1]);
+    }else if(strcmp(argv[i],"-Z")==0){
+      nucZ=atoi(argv[i+1]);
     }else if(strcmp(argv[i],"-ji")==0){
       ji=atof(argv[i+1]);
       if(ji<0){
@@ -366,6 +419,15 @@ int main(int argc, char *argv[]) {
       exit(-1);
     }
   }
+  if(calcB2){
+    if((EM!=0)||(L!=2)||(ji!=2)||(jf!=0)){
+      printf("ERROR: Can only calculate beta_2 for 2->0 (g.s.) transitions.  The parameter values '-m E2 -ji 2 -jf 0' are required.\n");
+      exit(-1);
+    }else if(nucZ <= 0){
+      printf("ERROR: The proton number Z cannot be less than 1.\n");
+      exit(-1);
+    }
+  }
   
 
   /*print extra info*/
@@ -425,6 +487,8 @@ int main(int argc, char *argv[]) {
     }
     if(nucA>0)
       printf("A = %i\n",nucA);
+    if(nucZ>0)
+      printf("Z = %i\n",nucZ);
     if(brrel == 0)
       printf("Branching fraction: %.2f\n",branching);
     else if(brrel == 1)
@@ -463,10 +527,17 @@ int main(int argc, char *argv[]) {
 
   if(calcMode == 0){
     calcB(bup,EM,L,Et,lt,ji,jf,verbose,barn,mstr,nucA);
-    if(useDelta)
+    if(useDelta){
       calcB(bup,!EM,L+1,Et,lt1,ji,jf,verbose,barn,mstr1,nucA);
+    }
+    if(calcB2){
+      calcBeta2Lt(Et,lt,nucA,nucZ,verbose);
+    }
   }else if(calcMode == 1){
     calcLt(bup,EM,L,Et,b,ji,jf,verbose,barn,mstr,nucA,branching);
+    if(calcB2){
+      calcBeta2(Et,b,nucA,nucZ,barn,verbose);
+    }
   }
   
 
