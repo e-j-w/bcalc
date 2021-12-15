@@ -55,7 +55,7 @@ void printHelp(){
 double dblfac(unsigned int n){ 
   double val = 1.0;
   int i;
-  for (i=n; i>=0; i=i-2){
+  for (i=(int)n; i>=0; i=i-2){
     if (i==0 || i==1)
       return val;
     else
@@ -65,7 +65,7 @@ double dblfac(unsigned int n){
 }
 
 /* calculates single particle lifetimes */
-double ltsp(int EM, int L, int nucA, const double Et_keV){
+double ltsp(const int EM, const int L, const int nucA, const double Et_keV){
 
   if(L>5){
     printf("ERROR: Cannot calculate single particle lifetimes for transitions with L>5.\n");
@@ -151,7 +151,7 @@ void calcBeta2(const double Et, const double b_in, const int nucA, const int nuc
 /* calculates the value of the quadrupole deformation parameter, assuming an input lifetime and a 2->0 transition */
 void calcBeta2Lt(const double Et, const double lt, const int nucA, const int nucZ, const int verbose){
 
-  double fac = 8.0*PI*(2+1)/(2*HBAR_MEVS*pow(dblfac((2.0*2)+1.0),2.0)*LN2);
+  double fac = 8.0*PI*(2+1)/(2*HBAR_MEVS*pow(dblfac((unsigned int)((2.0*2)+1.0)),2.0)*LN2);
   fac = fac * (pow((Et/HBARC_MEVFM),2.0*2 + 1.0));
   
   double b=1/(fac*lt); /* lifetime to reduced transition probability (E2: e^2 fm^4) */
@@ -160,7 +160,7 @@ void calcBeta2Lt(const double Et, const double lt, const int nucA, const int nuc
 }
 
 /* calculates the value of the reduced transtion probability */
-void calcB(const int bup, const int EM, const int L, const double Et, const double lt, const double ji, const double jf, const int verbose, const int barn, const char * mstr, const int nucA){
+void calcB(const int bup, const int EM, const int L, const double Et, const double lt, const double ji, const double jf, const int verbose, const int barn, const char *mstr, const int nucA){
   if(verbose){
     printf("\nB(%s) CALCULATION\n-----------------\n",mstr);
   }
@@ -172,7 +172,7 @@ void calcB(const int bup, const int EM, const int L, const double Et, const doub
     return;
   }
 
-  double fac = 8.0*PI*(L+1)/(L*HBAR_MEVS*pow(dblfac((2.0*L)+1.0),2.0)*LN2);
+  double fac = 8.0*PI*(L+1)/(L*HBAR_MEVS*pow(dblfac((unsigned int)((2.0*L)+1.0)),2.0)*LN2);
   fac = fac * (pow((Et/HBARC_MEVFM),2.0*L + 1.0));
   /* lifetime to reduced transition probability */
   if(EM==0){
@@ -222,7 +222,7 @@ void calcB(const int bup, const int EM, const int L, const double Et, const doub
   }
 }
 
-void calcLt(const int bup, const int EM, const int L, const double Et, double b, const double ji, const double jf, const int verbose, const int barn, const char * mstr, const int nucA, const double branching){
+void calcLt(const int bup, const int EM, const int L, const double Et, double b, const double ji, const double jf, const int verbose, const int barn, const char *mstr, const int nucA, const double branching){
   if(verbose){
     printf("\nLIFETIME CALCULATION\n--------------------\n");
   }
@@ -248,7 +248,7 @@ void calcLt(const int bup, const int EM, const int L, const double Et, double b,
     }
   }
 
-  double fac = 8.0*PI*(L+1)/(L*HBAR_MEVS*pow(dblfac((2.0*L)+1.0),2.0)*LN2);
+  double fac = 8.0*PI*(L+1)/(L*HBAR_MEVS*pow(dblfac((unsigned int)((2.0*L)+1.0)),2.0)*LN2);
   fac = fac * (pow((Et/HBARC_MEVFM),2.0*L + 1.0));
   /* reduced transition probability to lifetime */
   if(EM==1){
