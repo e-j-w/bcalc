@@ -449,6 +449,10 @@ int main(int argc, char *argv[]) {
       printf("octopole");
     else if(L==4)
       printf("hexadecapole");
+    else if(L==5)
+      printf("triacontadipole");
+    else if(L==6)
+      printf("hexacontatetrapole");
     else
       printf("L = %i",L);
     if(useDelta&&(calcMode==0)){
