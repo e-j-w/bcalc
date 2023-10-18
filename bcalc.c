@@ -67,54 +67,20 @@ double dblfac(unsigned int n){
 /* calculates single particle lifetimes */
 double ltsp(const int EM, const int L, const int nucA, const double Et_keV){
 
-  if(L>5){
-    printf("ERROR: Cannot calculate single particle lifetimes for transitions with L>5.\n");
-    exit(-1);
-  }
-
   double hl_sp = 0.;
+  double hbar = 6.58212E-19; /* keV s */
+  double hbarc = 197.327E-10; /* keV cm */
+  double esq = 1.440E-10; /* kev cm */
+  double muNsq = 1.5922E-38; /* keV cm^3 */
+  double RFac = 1.2E-13; /* cm */
   if(EM == 0){
     /* electric */
-    switch(L){
-      case 5:
-        hl_sp = (2.89E44)/(pow(Et_keV,11.0)*pow(nucA,10./3.));
-        break;
-      case 4:
-        hl_sp = (6.50E31)/(pow(Et_keV,9.0)*pow(nucA,8./3.));
-        break;
-      case 3:
-        hl_sp = (2.04E19)/(pow(Et_keV,7.0)*pow(nucA,2.));
-        break;
-      case 2:
-        hl_sp= (9.52E6)/(pow(Et_keV,5.0)*pow(nucA,4./3.));
-        break;
-      case 1:
-        hl_sp = (6.76E-6)/(pow(Et_keV,3.0)*pow(nucA,2./3.));
-        break;
-      default:
-        break;
-    }
+    hl_sp = log(2.0)*L*pow(dblfac((unsigned int)(2*L + 1)),2.0)*hbar*pow(((3.0+L)/3.0),2.0)*pow(hbarc,2*L + 1)/(2.0*(L + 1.0)*esq*pow(RFac,2.0*L));
+    hl_sp /= (pow(Et_keV,2.0*L + 1)*pow(nucA,2.0*L/3.0));
   }else{
     /* magnetic */
-    switch(L){
-      case 5:
-        hl_sp = (9.42E44)/(pow(Et_keV,11.0)*pow(nucA,8./3.));
-        break;
-      case 4:
-        hl_sp = (2.12E32)/(pow(Et_keV,9.0)*pow(nucA,2.));
-        break;
-      case 3:
-        hl_sp = (6.66E19)/(pow(Et_keV,7.0)*pow(nucA,4./3.));
-        break;
-      case 2:
-        hl_sp = (3.10E7)/(pow(Et_keV,5.0)*pow(nucA,2./3.));
-        break;
-      case 1:
-        hl_sp = (2.20E-5)/pow(Et_keV,3.0);
-        break;
-      default:
-        break;
-    }
+    hl_sp = log(2.0)*L*pow(dblfac((unsigned int)(2*L + 1)),2.0)*hbar*pow(((3.0+L)/3.0),2.0)*pow(hbarc,2*L + 1)/(80.0*(L + 1.0)*muNsq*pow(RFac,2.0*L - 2.0));
+    hl_sp /= (pow(Et_keV,2.0*L + 1)*pow(nucA,(2.0*L - 2.0)/3.0));
   }
 
   //convert from half-life to lifetime (in s)
