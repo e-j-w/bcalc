@@ -459,10 +459,23 @@ int main(int argc, char *argv[]) {
       printf("A = %i\n",nucA);
     if(nucZ>0)
       printf("Z = %i\n",nucZ);
-    if(brrel == 0)
-      printf("Branching fraction: %.2f\n",branching);
-    else if(brrel == 1)
-      printf("Relative intensity: %.2f\n",branching);
+    if(brrel == 0){
+      if(branching > 0.1){
+        printf("Branching fraction: %.2f\n",branching);
+      }else if(branching > 0.001){
+        printf("Branching fraction: %.4f\n",branching);
+      }else{
+        printf("Branching fraction: %.8f\n",branching);
+      }
+    }else if(brrel == 1){
+      if(branching > 0.1){
+        printf("Relative intensity: %.2f\n",branching);
+      }else if(branching > 0.001){
+        printf("Relative intensity: %.4f\n",branching);
+      }else{
+        printf("Relative intensity: %.8f\n",branching);
+      }
+    }
   }
 
   /* branching fraction calculation */
