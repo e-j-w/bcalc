@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
   int i; /*counters*/
 
   /*initialize parameter values*/
-  char mstr[3], mstr1[12];
+  char mstr[4], mstr1[12];
   double Et = -1.; /* transition energy */
   int L = -1; /* multipolarity */
   int EM = -1; /* 0=electric, 1=magnetic */
@@ -297,7 +297,10 @@ int main(int argc, char *argv[]) {
         printf("ERROR: invalid multipole value.\n");
         exit(-1);
       }
-      if(isdigit(mstr[1])!=0){
+      if((isdigit(mstr[2])!=0)&&(isdigit(mstr[1])!=0)){
+        L=mstr[2] - '0';
+        L+=(mstr[1] - '0')*10;
+      }else if(isdigit(mstr[1])!=0){
         L=mstr[1] - '0';
       }else{
         printf("ERROR: invalid multipole value.\n");
@@ -357,6 +360,10 @@ int main(int argc, char *argv[]) {
   if(L<0){
     printf("ERROR: Missing parameter.\n");
     printf("    -m  --  multipole (eg. E1, M1, E2, etc.)\n");
+    exit(-1);
+  }
+  if(L > 12){
+    printf("ERROR: Maximum calculable L-value is 12.\n");
     exit(-1);
   }
   if ((fmod(ji,0.5)!=0.) || (fmod(jf,0.5)!=0.) || (fmod(jf-ji,1)!=0.)){
@@ -464,16 +471,24 @@ int main(int argc, char *argv[]) {
         printf("Branching fraction: %.2f\n",branching);
       }else if(branching > 0.001){
         printf("Branching fraction: %.4f\n",branching);
-      }else{
+      }else if(branching > 0.0000001){
         printf("Branching fraction: %.8f\n",branching);
+      }else if(branching > 0.00000000001){
+        printf("Branching fraction: %.12f\n",branching);
+      }else{
+        printf("Branching fraction: %.16f\n",branching);
       }
     }else if(brrel == 1){
       if(branching > 0.1){
         printf("Relative intensity: %.2f\n",branching);
       }else if(branching > 0.001){
         printf("Relative intensity: %.4f\n",branching);
-      }else{
+      }else if(branching > 0.0000001){
         printf("Relative intensity: %.8f\n",branching);
+      }else if(branching > 0.00000000001){
+        printf("Relative intensity: %.12f\n",branching);
+      }else{
+        printf("Relative intensity: %.16f\n",branching);
       }
     }
   }
