@@ -313,10 +313,6 @@ int main(int argc, char *argv[]) {
         printf("ERROR: invalid multipole value.\n");
         exit(-1);
       }
-      if(mstr[2] != '\0'){
-        printf("ERROR: invalid multipole value, only L-values < 10 can be used.\n");
-        exit(-1);
-      }
       
     }else if((strcmp(argv[i],"-Lt")==0)||(strcmp(argv[i],"-lt")==0)||(strcmp(argv[i],"-Ltps")==0)||(strcmp(argv[i],"-ltps")==0)){
       lt=atof(argv[i+1]);
