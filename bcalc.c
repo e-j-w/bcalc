@@ -51,7 +51,7 @@ void printHelp(){
   printf("                   with the -br option is actually an intensity\n");
   printf("                   relative to another transition.\n");
   printf("    --beta2    --  Calculate the quadrupole deformation parameter,\n");
-  printf("                   assuming a 2->0 (g.s.) transition.  Requires\n");
+  printf("                   assuming a 2->0 (g.s.) E2 transition.  Requires\n");
   printf("                   '-m E2 -ji 2 -jf 0', and the -A and -Z parameters.\n");
   printf("                   Assumes mean charge radius R = r_0*A^(1/3), with\n");
   printf("                   r_0 = 1.2 fm.\n");

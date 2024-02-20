@@ -1,6 +1,6 @@
 # bcalc
 
-**Reduced transition probability calculator**
+**Reduced transition probability calculator** - because no one else made a simple command line calculator for this.
 
 Maintainer: Jonathan Williams
 
@@ -34,7 +34,7 @@ One of the following is needed:
 |**Parameter**|**Description**|
 |:---:|:---:|
 | -lt | Mean transition lifetime (in ps, use -ltns / -ltus / -lts / -lth for nanoseconds / microseconds / seconds / hours, respectively). |
-| -hl | Transition half-life (in ps, use -hlns / -hlus / -hls / -hlh for nanoseconds / microseconds / seconds / hours, respectively) |
+| -hl | Transition half-life (in ps, use -hlns / -hlus / -hls / -hlh for nanoseconds / microseconds / seconds / hours, respectively). |
 | -b | Reduced transition probability (for the L multipole) in units of e^2 fm^(2L) for electric multipoles or uN^2 fm^(2L-2) for magnetic multipoles. |
 
 Optional parameters:
@@ -56,6 +56,6 @@ Flags:
 | --wu  |  Use/calculate transition probability in Weisskopf units (W.u.) rather than the default units specified above.  If used, requires the `-A` parameter. |
 | --up | Use/calculate transition probability from final to initial state instead of vice versa.  If used, requires the `-ji` and `-jf` parameters. |
 | --brrel | Specifies that the branching fraction provided with the `-br` option is actually an intensity relative to another transition. |
-| --beta2 | Calculate the quadrupole deformation parameter, assuming a 2->0 (g.s.) transition.  Requires `-m E2 -ji 2 -jf 0`, and the `-A` and `-Z` parameters.  Assumes mean charge radius R = r_0*A^(1/3), with r_0 = 1.2 fm. |
+| --beta2 | Calculate the quadrupole deformation parameter, assuming a 2->0 (g.s.) E2 transition.  Requires `-m E2 -ji 2 -jf 0`, and the `-A` and `-Z` parameters.  Assumes mean charge radius R = r_0*A^(1/3), with r_0 = 1.2 fm. |
 | --quiet | Only show the result of the calculation. |
 | --help | Print a list of parameters. |
