@@ -1,6 +1,6 @@
 # bcalc
 
-Reduced transition probability calculator
+**Reduced transition probability calculator**
 
 Maintainer: Jonathan Williams
 
@@ -8,7 +8,7 @@ Maintainer: Jonathan Williams
 
 Use `make` to compile. To run the program from anywhere, move the resulting `bcalc` executable to any directory under your `$PATH` environment variable.
 
-This shouldn't depend on any external libraries.  Tested on CentOS 7 and Arch Linux (as of December 2020).
+This shouldn't depend on any external libraries.  Tested on CentOS 7 and Arch Linux (as of February 2024).
 
 ## Usage
 
@@ -33,8 +33,8 @@ One of the following is needed:
 
 |**Parameter**|**Description**|
 |:---:|:---:|
-| -lt | Mean transition lifetime (in ps) |
-| -hl | Transition half-life (in ps) |
+| -lt | Mean transition lifetime (in ps, use -ltns / -ltus / -lts / -lth for nanoseconds / microseconds / seconds / hours, respectively). |
+| -hl | Transition half-life (in ps, use -hlns / -hlus / -hls / -hlh for nanoseconds / microseconds / seconds / hours, respectively) |
 | -b | Reduced transition probability (for the L multipole) in units of e^2 fm^(2L) for electric multipoles or uN^2 fm^(2L-2) for magnetic multipoles. |
 
 Optional parameters:

@@ -8,8 +8,14 @@ void printHelp(){
   printf("    -m         --  multipole (eg. E1, M1, E2, etc.)\n");
   printf("\n");
   printf("  One of the following is needed:\n");
-  printf("    -lt        --  Mean transition lifetime (in ps)\n");
-  printf("    -hl        --  Transition half-life (in ps)\n");
+  printf("    -lt        --  Mean transition lifetime (in ps, use\n");
+  printf("                   -ltns / -ltus / -lts / -lth for\n");
+  printf("                   nanoseconds / microseconds / seconds / hours,\n");
+  printf("                   respectively).\n");
+  printf("    -hl        --  Transition half-life (in ps, use\n");
+  printf("                   -hlns / -hlus / -hls / -hlh for\n");
+  printf("                   nanoseconds / microseconds / seconds / hours,\n");
+  printf("                   respectively).\n");
   printf("    -b         --  Reduced transition probability (for the\n"); 
   printf("                   L multipole) in units of e^2 fm^(2L) for\n");
   printf("                   electric multipoles or uN^2 fm^(2L-2) for\n");
@@ -47,7 +53,7 @@ void printHelp(){
   printf("    --beta2    --  Calculate the quadrupole deformation parameter,\n");
   printf("                   assuming a 2->0 (g.s.) transition.  Requires\n");
   printf("                   '-m E2 -ji 2 -jf 0', and the -A and -Z parameters.\n");
-  printf("                   Assumes mean charge radius R = r_0*A^(1/3), with.\n");
+  printf("                   Assumes mean charge radius R = r_0*A^(1/3), with\n");
   printf("                   r_0 = 1.2 fm.\n");
   printf("    --quiet    --  Only show the result of the calculation.\n");
 }
@@ -240,7 +246,7 @@ int main(int argc, char *argv[]) {
   int i; /*counters*/
 
   /*initialize parameter values*/
-  char mstr[3], mstr1[12];
+  char mstr[4], mstr1[12];
   double Et = -1.; /* transition energy */
   int L = -1; /* multipolarity */
   int EM = -1; /* 0=electric, 1=magnetic */
@@ -288,6 +294,7 @@ int main(int argc, char *argv[]) {
         exit(-1);
       }
     }else if((strcmp(argv[i],"-M")==0)||(strcmp(argv[i],"-m")==0)){
+      mstr[2] = '\0';
       strncpy(mstr,argv[i+1],sizeof(mstr));
       if(mstr[0] == 'E'){
         EM=0;
@@ -303,12 +310,40 @@ int main(int argc, char *argv[]) {
         printf("ERROR: invalid multipole value.\n");
         exit(-1);
       }
+      if(mstr[2] != '\0'){
+        printf("ERROR: invalid multipole value, only L-values < 10 can be used.\n");
+        exit(-1);
+      }
       
-    }else if((strcmp(argv[i],"-Lt")==0)||(strcmp(argv[i],"-lt")==0)){
+    }else if((strcmp(argv[i],"-Lt")==0)||(strcmp(argv[i],"-lt")==0)||(strcmp(argv[i],"-Ltps")==0)||(strcmp(argv[i],"-ltps")==0)){
       lt=atof(argv[i+1]);
       calcMode = 0;
-    }else if((strcmp(argv[i],"-Hl")==0)||(strcmp(argv[i],"-hl")==0)){
+    }else if((strcmp(argv[i],"-Ltns")==0)||(strcmp(argv[i],"-ltns")==0)){
+      lt=atof(argv[i+1])*1000.0;
+      calcMode = 0;
+    }else if((strcmp(argv[i],"-Ltus")==0)||(strcmp(argv[i],"-ltus")==0)){
+      lt=atof(argv[i+1])*1000000.0;
+      calcMode = 0;
+    }else if((strcmp(argv[i],"-Lts")==0)||(strcmp(argv[i],"-lts")==0)){
+      lt=atof(argv[i+1])*1000000000000.0;
+      calcMode = 0;
+    }else if((strcmp(argv[i],"-Lth")==0)||(strcmp(argv[i],"-lth")==0)){
+      lt=atof(argv[i+1])*3600*1000000000000.0;
+      calcMode = 0;
+    }else if((strcmp(argv[i],"-Hl")==0)||(strcmp(argv[i],"-hl")==0)||(strcmp(argv[i],"-Hlps")==0)||(strcmp(argv[i],"-hlps")==0)){
       lt=atof(argv[i+1])/LN2;
+      calcMode = 0;
+    }else if((strcmp(argv[i],"-Hlns")==0)||(strcmp(argv[i],"-hlns")==0)){
+      lt=atof(argv[i+1])*1000.0/LN2;
+      calcMode = 0;
+    }else if((strcmp(argv[i],"-Hlus")==0)||(strcmp(argv[i],"-hlus")==0)){
+      lt=atof(argv[i+1])*1000000.0/LN2;
+      calcMode = 0;
+    }else if((strcmp(argv[i],"-Hls")==0)||(strcmp(argv[i],"-hls")==0)){
+      lt=atof(argv[i+1])*1000000000000.0/LN2;
+      calcMode = 0;
+    }else if((strcmp(argv[i],"-Hlh")==0)||(strcmp(argv[i],"-hlh")==0)){
+      lt=atof(argv[i+1])*3600*1000000000000.0/LN2;
       calcMode = 0;
     }else if((strcmp(argv[i],"-B")==0)||(strcmp(argv[i],"-b")==0)){
       b=atof(argv[i+1]);
@@ -387,12 +422,20 @@ int main(int argc, char *argv[]) {
   }
   if(calcB2){
     if((EM!=0)||(L!=2)||(ji!=2)||(jf!=0)){
-      printf("ERROR: Can only calculate beta_2 for 2->0 (g.s.) transitions.  The parameter values '-m E2 -ji 2 -jf 0' are required.\n");
-      exit(-1);
-    }else if(nucZ <= 0){
-      printf("ERROR: The proton number Z cannot be less than 1.\n");
+      printf("ERROR: Can only calculate beta_2 for 2->0 (g.s.) E2 transitions.  The parameter values '-m E2 -ji 2 -jf 0' are required.\n");
       exit(-1);
     }
+    if((nucZ == -1)||(nucA == -1)){
+      printf("ERROR: when calculating beta_2, must specify both the -A and -Z parameters.\n");
+      exit(-1);
+    }else if((nucZ <= 0)||(nucA <= 0)){
+      printf("ERROR: The proton number Z or mass number A cannot be less than 1.\n");
+      exit(-1);
+    }
+  }
+  if(nucA < nucZ){
+    printf("ERROR: The mass number A cannot be less than the proton number Z.\n");
+    exit(-1);
   }
   
 
@@ -419,15 +462,32 @@ int main(int argc, char *argv[]) {
       printf("triacontadipole");
     else if(L==6)
       printf("hexacontatetrapole");
+    else if(L==7)
+      printf("hecatonicosioctopole");
+    else if(L==8)
+      printf("diacosiapentecontahexadecapole");
     else
       printf("L = %i",L);
     if(useDelta&&(calcMode==0)){
-      printf(" (L+1 mixing, delta = %0.3f)", delta);
+      if(delta > 0.01){
+        printf(" (L+1 mixing, delta = %0.3f)", delta);
+      }else if(delta > 0.00001){
+        printf(" (L+1 mixing, delta = %0.6f)", delta);
+      }else{
+        printf(" (L+1 mixing, delta = %0.9f)", delta);
+      }
     }
     printf("\n");
-    if(calcMode == 0)
-      printf("Mean lifetime: %0.3f ps\n",lt);
-    else if(calcMode == 1){
+    if(calcMode == 0){
+      if(lt < 1E3){
+        printf("Mean lifetime: %0.3f ps\n",lt);
+      }else if(lt < 1E12){
+        printf("Mean lifetime: %0.3f ns\n",lt/((double)1E3));
+      }else if(lt < 1E16){
+        printf("Mean lifetime: %0.3f s\n",lt/((double)1E12));
+      }else
+        printf("Mean lifetime: %0.3f hr\n",lt/(3600.0*(double)1E12));
+    }else if(calcMode == 1){
       printf("B(%s): %f ",mstr, b);
       if(EM==0){
         if(barn == 0){
@@ -483,9 +543,6 @@ int main(int argc, char *argv[]) {
     branching = branching/(branching + 1.0);
   if(calcMode == 0)
     lt = 1.0/((1.0/lt)*branching); //partial lifetime
-  if((verbose)&&(calcMode==0)&&(branching != 1.)){
-    printf("Partial lifetime: %0.3f ps\n",lt);
-  }
 
   /* mixing ratio calculation */
   if(useDelta){
@@ -495,13 +552,42 @@ int main(int argc, char *argv[]) {
       snprintf(mstr1,12,"M%i",L+1);
     else
       snprintf(mstr1,12,"E%i",L+1);
-
-    if(verbose){
-      printf("Partial lifetime (%s): %0.3f ps\n",mstr,lt);
-      printf("Partial lifetime (%s): %0.3f ps\n",mstr1,lt1);
-    }
-    
   }
+
+  /* report partial lifetimes */
+  if((verbose)&&(calcMode==0)){
+    if((branching != 1.)&&(!useDelta)){
+      if(lt < 1E3){
+        printf("Partial lifetime: %0.3f ps\n",lt);
+      }else if(lt < 1E12){
+        printf("Partial lifetime: %0.3f ns\n",lt/((double)1E3));
+      }else if(lt < 1E16){
+        printf("Partial lifetime: %0.3f s\n",lt/((double)1E12));
+      }else{
+        printf("Partial lifetime: %0.3f hr\n",lt/(3600.0*(double)1E12));
+      }
+    }else if(useDelta){
+      if(lt < 1E3){
+        printf("Partial lifetime (%s): %0.3f ps\n",mstr,lt);
+      }else if(lt < 1E12){
+        printf("Partial lifetime (%s): %0.3f ns\n",mstr,lt/((double)1E3));
+      }else if(lt < 1E16){
+        printf("Partial lifetime (%s): %0.3f s\n",mstr,lt/((double)1E12));
+      }else{
+        printf("Partial lifetime (%s): %0.3f hr\n",mstr,lt/(3600.0*(double)1E12));
+      }
+      if(lt1 < 1E3){
+        printf("Partial lifetime (%s): %0.3f ps\n",mstr1,lt1);
+      }else if(lt1 < 1E12){
+        printf("Partial lifetime (%s): %0.3f ns\n",mstr1,lt1/((double)1E3));
+      }else if(lt1 < 1E16){
+        printf("Partial lifetime (%s): %0.3f s\n",mstr1,lt1/((double)1E12));
+      }else{
+        printf("Partial lifetime (%s): %0.3f hr\n",mstr1,lt1/(3600.0*(double)1E12));
+      }
+    }
+  }
+
 
   lt=lt*1.0E-12; //convert lifetime to s
   lt1=lt1*1.0E-12; //convert lifetime to s
