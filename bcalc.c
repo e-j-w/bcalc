@@ -28,6 +28,8 @@ void printHelp(){
   printf("    -br        --  branching fraction of this transition (maximum 1,\n"); 
   printf("                   default 1)\n");
   printf("    -d         --  mixing ratio with the L+1 multipole\n");
+  printf("    -icc       --  internal conversion coefficient for this transition\n");
+  printf("                   (default 0)\n");
   printf("    -ji        --  inital spin (integer or half-integer)\n");
   printf("    -jf        --  final spin (integer or half-integer)\n");
   printf("    -A         --  mass number of the nucleus\n");
@@ -261,6 +263,7 @@ int main(int argc, char *argv[]) {
   double jf = -1.; /* Final spin*/
   double delta = 0; /* mixing ratio */
   double branching = 1.; /* branching fraction */
+  double icc = 0.; /* internal conversion coefficient */
   int useDelta = 0; /* 0=no mixing, 1=mixing */
   int calcB2 = 0; /* 0=no beta_2 calc, 1=calc beta_2 */
   int brrel = 0; /* 0=use branching fraction, 1=use relative intensity */
@@ -352,6 +355,12 @@ int main(int argc, char *argv[]) {
       useDelta = 1;
     }else if(strcmp(argv[i],"-br")==0){
       branching=atof(argv[i+1]);
+    }else if(strcmp(argv[i],"-icc")==0){
+      icc=atof(argv[i+1]);
+      if(icc < 0.){
+        printf("ERROR: Internal conversion coefficient must be a positive number.\n");
+        exit(-1);
+      }
     }else if(strcmp(argv[i],"-A")==0){
       nucA=atoi(argv[i+1]);
     }else if(strcmp(argv[i],"-Z")==0){
@@ -481,6 +490,9 @@ int main(int argc, char *argv[]) {
       }
     }
     printf("\n");
+    if(icc > 0.){
+      printf("Internal conversion coefficient: %0.3f\n",icc);
+    }
     if(calcMode == 0){
       if(lt < 1E3){
         printf("Mean lifetime: %0.3f ps\n",lt);
@@ -552,8 +564,10 @@ int main(int argc, char *argv[]) {
   /* branching fraction calculation */
   if(brrel == 1)
     branching = branching/(branching + 1.0);
-  if(calcMode == 0)
+  if(calcMode == 0){
     lt = 1.0/((1.0/lt)*branching); //partial lifetime
+    lt = lt*(1.0 + icc);
+  }
 
   /* mixing ratio calculation */
   if(useDelta){

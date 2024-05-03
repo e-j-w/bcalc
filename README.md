@@ -43,6 +43,7 @@ Optional parameters:
 |:---:|:---:|
 | -br | branching fraction of this transition (maximum 1, default 1) |
 | -d | mixing ratio with the L+1 multipole |
+| -icc | internal conversion coefficient for this transition (default 0) |
 | -ji | inital spin (integer or half-integer) |
 | -jf | final spin (integer or half-integer) |
 | -A | mass number of the nucleus |
